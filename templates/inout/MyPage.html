@@ -2,10 +2,21 @@
 {% load staticfiles otree %}
 
 {% block title %}
-    Page title
+    Main Page
+{% endblock %}
+
+{% block scripts %}
+    <script src="//code.highcharts.com/stock/highstock.js"></script>
+
+    <link
+        rel="import"
+        href="{% static "webcomponents/inout/in-out.html" %}">
 {% endblock %}
 
 {% block content %}
+
+    <in-out>
+    </in-out>
 
     {% next_button %}
 

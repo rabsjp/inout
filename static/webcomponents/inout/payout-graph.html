@@ -1,0 +1,75 @@
+<link
+    rel="import"
+    href="/static/bower_components/polymer/polymer.html" />
+
+<dom-module id="payout-graph">
+
+    <template>
+        <div id="graph"></div>
+    </template>
+
+    <script>
+        Polymer({
+            is: 'payout-graph',
+            properties: {},
+            ready() {
+                console.log("Graph loaded");
+                this.async(this._initChart.bind(this), 1);
+            },
+            _initChart() {
+                let series = [{
+                    data: [
+                        [0,1],
+                        [1,2],
+                        [2,3],
+                        [3,4],
+                        [4,5],
+                        [5,6],
+                        [6,7],
+                        [7,8],
+                        [8,9],
+                        [9,10]
+                    ]
+                }];
+
+                this.graph_obj = Highcharts.chart ({
+                    chart: {
+                        animation: false,
+                        renderTo: this.$.graph,
+                        width: 500, 
+                        height: 500
+                    },
+                    title: { 
+                        text: "Your data"
+                    },
+                    xAxis: {
+                        min: 0,
+                        max: 60, // Period length
+                        title: {
+                            text: 'Period'
+                        },
+                    },
+                    yAxis: {
+                        min: 0,
+                        max: 300, // Period length
+                        title: {
+                            text: 'Period'
+                        },
+                    },
+                    credits: {
+                        enabled: false
+                    },
+                    tooltip: {
+                        enabled: false
+                    },
+
+                    series: series
+
+                });
+
+                console.log(this.graph_obj.series);
+                
+            } 
+        });
+    </script>
+</dom-module>

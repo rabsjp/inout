@@ -1,0 +1,38 @@
+<link
+    rel="import"
+    href="/static/bower_components/polymer/polymer.html" />
+<link
+    rel="import"
+    href="/static/webcomponents/inout/payout-graph.html" />
+
+<dom-module id="in-out">
+    <template>
+        <div id="strategy_info">
+            <span id="choice"> /1</span> <span id="static_text"> in your group chose</span> <span id="choice"> </span>
+        </div>
+        <div id="payoff">
+            Your current pay off is  ; cumlative is  
+        </div>
+        <div id="graphs">
+            <payout-graph>
+
+            </payout-graph>
+        </div>
+
+        <br>
+    </template>   
+    
+    <script>
+        Polymer({
+            is: 'in-out',
+            properties: {
+
+            },
+            ready() {
+                console.log("test");
+                //this.payout-graph = this.$$('payout-graph');
+            }
+        });
+    </script>
+
+</dom-module>
