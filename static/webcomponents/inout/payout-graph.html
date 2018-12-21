@@ -11,25 +11,22 @@
     <script>
         Polymer({
             is: 'payout-graph',
-            properties: {},
+            properties: {
+                data: {
+                    type: Array,
+                }
+            },
             ready() {
                 console.log("Graph loaded");
                 this.async(this._initChart.bind(this), 1);
+                console.log(this.data);
+                
             },
             _initChart() {
+                console.log("initializing graph");
                 let series = [{
-                    data: [
-                        [0,1],
-                        [1,2],
-                        [2,3],
-                        [3,4],
-                        [4,5],
-                        [5,6],
-                        [6,7],
-                        [7,8],
-                        [8,9],
-                        [9,10]
-                    ]
+                    type: 'line',
+                    data: this.data
                 }];
 
                 this.graph_obj = Highcharts.chart ({
@@ -69,6 +66,10 @@
 
                 console.log(this.graph_obj.series);
                 
+            },
+            addData(dataArr) {
+                this.graph_obj.series.data.push(dataArr);
+                console.log("Data pushed");
             } 
         });
     </script>

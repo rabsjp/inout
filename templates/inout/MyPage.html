@@ -11,13 +11,16 @@
     <link
         rel="import"
         href="{% static "webcomponents/inout/in-out.html" %}">
+
+    <script>
+        {% comment %} console.log("{{ data }}"); {% endcomment %}
+    </script>
 {% endblock %}
 
 {% block content %}
 
-    <in-out>
+    <in-out
+        game-Data='{{ data }}'>
     </in-out>
-
-    {% next_button %}
 
 {% endblock %}

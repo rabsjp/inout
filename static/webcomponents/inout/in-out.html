@@ -11,27 +11,91 @@
             <span id="choice"> /1</span> <span id="static_text"> in your group chose</span> <span id="choice"> </span>
         </div>
         <div id="payoff">
-            Your current pay off is  ; cumlative is  
+            Your current pay off is {{ gameData }} ; cumlative is  
         </div>
         <div id="graphs">
-            <payout-graph>
-
+            <payout-graph
+                data='{{ gameData }}'>
             </payout-graph>
         </div>
 
         <br>
+
+        <button
+            type="button"
+            value=true
+            on-tap="_changeStatus"
+            class="choiceButton">
+            IN
+        </button>
+        <button
+            type="button"
+            value=false
+            on-tap="_changeStatus"
+            class="choiceButton">
+            OUT
+        </button>
     </template>   
     
     <script>
         Polymer({
             is: 'in-out',
             properties: {
+                gameData: {
+                    type: Array,
+                },
+                isIn:{
+                    type: Boolean,
+                    value: false,
+                },
+                _x_t:{
+                    type: Number,
 
+                },
+                _a_sto:{
+                    type: Number,
+                },
+                _noise:{
+                    type: Number,
+                },
+                _startingTime:{
+                    type: Number,
+                },
             },
             ready() {
-                console.log("test");
-                //this.payout-graph = this.$$('payout-graph');
+                console.log("in-out.html");
+                this.async(this._setStartingTime, 1);
+            },
+            _setStartingTime() {
+                this._startingTime = Date.now();
+                console.log(this._startingTime);
+            },
+            _changeStatus(e){
+                this.isIn = e.target.value;
+            },
+            _generateA() {
+                this._a_sto = Math.random();
+                console.log(this._a_sto);
+            },
+            _generateNoise() {
+                return 0;
+            },
+            _generateX_t() {
+                index = _calculateTime();
+                _generateA();
+                _generateNoise();
+
+                this._x_t = ((this._a_sto * this._x_t) + this._noise);
+
+                this.gameData.push([index, this._x_t]);
+            },
+            _calculateTime() {
+                tempNow = (Date.now() / 1000);
+                tempBegin = (this._startingTime / 1000);
+
+                return (tempNow - tempBegin);
             }
+
         });
     </script>
 

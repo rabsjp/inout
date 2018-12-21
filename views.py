@@ -5,7 +5,11 @@ from .models import Constants
 
 
 class MyPage(Page):
-    pass
+    def vars_for_template(self):
+        return {
+            "data": [1,2,1,1,2,1,2,12,1,2,1,12]
+        }
+    
 
 
 class ResultsWaitPage(WaitPage):
