@@ -7,7 +7,19 @@ from .models import Constants
 class MyPage(Page):
     def vars_for_template(self):
         return {
-            "data": [1,2,1,1,2,1,2,12,1,2,1,12]
+            "data": [
+                [0,1],
+                [1,2],
+                [2,3],
+                [3,4],
+                [4,5],
+                [5,6],
+                [6,7],
+                [7,8],
+                [8,9],
+                [9,10]
+            ],
+            "gameConstant": 120, # Game constant to be determined by config file
         }
     
 

@@ -15,7 +15,8 @@
         </div>
         <div id="graphs">
             <payout-graph
-                data='{{ gameData }}'>
+                data='[[ gameData ]]'
+                game-Constant='[[ c ]]'>
             </payout-graph>
         </div>
 
@@ -41,12 +42,15 @@
         Polymer({
             is: 'in-out',
             properties: {
-                gameData: {
+                gameData:{
                     type: Array,
                 },
                 isIn:{
                     type: Boolean,
                     value: false,
+                },
+                c: {
+                    type: Number,
                 },
                 _x_t:{
                     type: Number,
@@ -61,6 +65,7 @@
                 _startingTime:{
                     type: Number,
                 },
+                
             },
             ready() {
                 console.log("in-out.html");
@@ -69,9 +74,11 @@
             _setStartingTime() {
                 this._startingTime = Date.now();
                 console.log(this._startingTime);
+                this._tick();
             },
             _changeStatus(e){
                 this.isIn = e.target.value;
+                console.log(this.isIn);
             },
             _generateA() {
                 this._a_sto = Math.random();
@@ -81,19 +88,51 @@
                 return 0;
             },
             _generateX_t() {
-                index = _calculateTime();
-                _generateA();
-                _generateNoise();
+                // index = this._calculateTime();
+                this._generateA();
+                this._generateNoise();
 
                 this._x_t = ((this._a_sto * this._x_t) + this._noise);
 
-                this.gameData.push([index, this._x_t]);
+                //this.gameData.push([index, this._x_t]);
             },
             _calculateTime() {
                 tempNow = (Date.now() / 1000);
                 tempBegin = (this._startingTime / 1000);
+                timeNow = tempNow - tempBegin;
 
-                return (tempNow - tempBegin);
+
+                return timeNow;
+            },
+            _tick() {
+                index = this._calculateTime();
+                if(this.isIn){
+                    this._generateX_t();
+                    // this.gameData.push([index, this._x_t]);
+                    this._updateGraph([index, this._x_t]);
+                    console.log("isIn: true");
+                } else {
+                    console.log("isIn: false");
+                    // this.gameData.push([index, this.c]);
+                    this._updateGraph([index, this.c]);
+
+                }
+
+                if(timeNow > 60){
+                    window.clearTimeout(this.timeout);
+                    console.log("Killed");
+                } else {
+                    // console.log("gameData: " + this.gameData);
+                    console.log("pushed data: [" + index + "," + this.c + "]");
+                    this.timeout = window.setTimeout(this._tick.bind(this), 2000);
+                }
+
+
+            },
+            _updateGraph(data) {
+                let graph = Polymer.dom(this.root).querySelectorAll('payoff-graph');
+
+                graph.addData(data);
             }
 
         });
