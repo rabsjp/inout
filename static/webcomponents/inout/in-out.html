@@ -8,14 +8,13 @@
 <dom-module id="in-out">
     <template>
         <div id="strategy_info">
-            <span id="choice"> /1</span> <span id="static_text"> in your group chose</span> <span id="choice"> </span>
+            <span id="choice">{{ _inGroup }}/1</span> <span id="static_text"> in your group chose</span> <span id="choice"> P</span>
         </div>
         <div id="payoff">
-            Your current pay off is {{ gameData }} ; cumlative is  
+            Your current pay off is {{ _currentPayoff }}; cumlative is {{ _cumulativePayoff }}
         </div>
         <div id="graphs">
             <payout-graph
-                data='[[ gameData ]]'
                 game-Constant='[[ c ]]'>
             </payout-graph>
         </div>
@@ -42,59 +41,75 @@
         Polymer({
             is: 'in-out',
             properties: {
-                gameData:{
-                    type: Array,
-                },
-                isIn:{
+                isIn: {
                     type: Boolean,
-                    value: false,
                 },
                 c: {
                     type: Number,
                 },
-                _x_t:{
+                _x_t: {
                     type: Number,
 
                 },
-                _a_sto:{
+                _a_sto: {
                     type: Number,
                 },
-                _noise:{
+                _noise: {
                     type: Number,
                 },
-                _startingTime:{
+                _startingTime: {
                     type: Number,
                 },
-                
+                _inGroup:{
+                    type: Number,
+                    value: 0,
+                },
+                _currentPayoff: {
+                    type: Number,
+                    value: 0,
+                },
+                _cumulativePayoff: {
+                    type: Number,
+                    value: 0,
+                }
             },
             ready() {
                 console.log("in-out.html");
                 this.async(this._setStartingTime, 1);
+                this.payoff_graph = this.$$('payout-graph');
+                
+                this._x_t = this.c;
+                //this._currentPayoff = this.c;
+                //this._cumulativePayoff = this._currentPayoff;
             },
             _setStartingTime() {
                 this._startingTime = Date.now();
-                console.log(this._startingTime);
                 this._tick();
             },
             _changeStatus(e){
-                this.isIn = e.target.value;
-                console.log(this.isIn);
+                if(e.target.value === 'true'){
+                    this.isIn = true;
+                    this._inGroup = 1;
+                } else{
+                    this.isIn = false;
+                    this._inGroup = 0;
+                }
             },
             _generateA() {
                 this._a_sto = Math.random();
-                console.log(this._a_sto);
             },
             _generateNoise() {
-                return 0;
+                this._noise = Math.random()*(this.c);
             },
             _generateX_t() {
-                // index = this._calculateTime();
+                
                 this._generateA();
                 this._generateNoise();
 
                 this._x_t = ((this._a_sto * this._x_t) + this._noise);
 
-                //this.gameData.push([index, this._x_t]);
+                this._x_t = parseFloat(this._x_t.toFixed(3));
+
             },
             _calculateTime() {
                 tempNow = (Date.now() / 1000);
@@ -106,15 +121,14 @@
             },
             _tick() {
                 index = this._calculateTime();
-                if(this.isIn){
+                if(this.isIn === true){
                     this._generateX_t();
-                    // this.gameData.push([index, this._x_t]);
                     this._updateGraph([index, this._x_t]);
-                    console.log("isIn: true");
+                    this._updatePayoff(this._x_t);
+                    
                 } else {
-                    console.log("isIn: false");
-                    // this.gameData.push([index, this.c]);
                     this._updateGraph([index, this.c]);
+                    this._updatePayoff(this.c);
 
                 }
 
@@ -122,17 +136,19 @@
                     window.clearTimeout(this.timeout);
                     console.log("Killed");
                 } else {
-                    // console.log("gameData: " + this.gameData);
-                    console.log("pushed data: [" + index + "," + this.c + "]");
                     this.timeout = window.setTimeout(this._tick.bind(this), 2000);
                 }
 
 
             },
             _updateGraph(data) {
-                let graph = Polymer.dom(this.root).querySelectorAll('payoff-graph');
+                this.payoff_graph.addData(data);
+            },
+            _updatePayoff(current){
+                console.log("typeof current = " + typeof current);
 
-                graph.addData(data);
+                this._currentPayoff = current;
+                this._cumulativePayoff = this._cumulativePayoff + current;
             }
 
         });
