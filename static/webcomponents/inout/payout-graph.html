@@ -12,26 +12,45 @@
         Polymer({
             is: 'payout-graph',
             properties: {
-                data: {
-                    type: Array,
-                    value: [],
+                treatment: {
+                    type: String,
                 },
                 gameConstant:{
                     type: Number,
                 },
+                _personalData: {
+                    type: Array,
+                    value: [],
+                },
+                _X_tData: {
+                    type: Array,
+                    value: [],
+                },
+                _index: {
+                    type: Number,
+                    value: 0
+
+                }
             },
             ready() {
                 console.log("Graph loaded");
                 this.async(this._initChart.bind(this), 1);
-                console.log(this.data);
                 
             },
             _initChart() {
                 console.log("initializing graph");
-                let series = [{
-                    type: 'line',
-                    data: this.data
-                }];
+                let series = [
+                    {
+                        type: 'line',
+                        name: "Value (me)",
+                        data: this._personalData,
+                    },
+                    {
+                        type: 'line',
+                        name: "Average Value (group)",
+                        data: this._X_tData,
+                    }
+                ];
 
                 this.graph_obj = Highcharts.chart ({
                     chart: {
@@ -89,12 +108,16 @@
 
                 
             },
-            addData(dataArr) {
-                this.data.push(dataArr);
-                this.graph_obj.series[0].setData(this.data);
+            addPersonalData(dataArr) {
+                this._personalData.push(dataArr);
+                this.graph_obj.series[0].setData(this._personalData);
                 //console.log(this.graph_obj.series[0].data);
                 
-            } 
+            },
+            addX_tData(dataArr) {
+                this._X_tData.push(dataArr);
+                this.graph_obj.series[1].setData(this._X_tData);
+            },
         });
     </script>
 </dom-module>

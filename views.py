@@ -7,7 +7,8 @@ from .models import Constants
 class MyPage(Page):
     def vars_for_template(self):
         return {
-            "gameConstant": 120, # Game constant to be determined by config file
+            "gameConstant": 120,        # Game constant to be determined by config file
+            "treatment": 'O',           # Treatment to be decided by config file
         }
     
 

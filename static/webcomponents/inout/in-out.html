@@ -47,6 +47,9 @@
                 c: {
                     type: Number,
                 },
+                treatment: {
+                    type: String,
+                },
                 _x_t: {
                     type: Number,
 
@@ -71,6 +74,10 @@
                 _cumulativePayoff: {
                     type: Number,
                     value: 0,
+                },
+                _wasSkipInData: {
+                    type: Boolean,
+                    value: false
                 }
             },
             ready() {
@@ -79,8 +86,6 @@
                 this.payoff_graph = this.$$('payout-graph');
                 
                 this._x_t = this.c;
-                //this._currentPayoff = this.c;
-                //this._cumulativePayoff = this._currentPayoff;
             },
             _setStartingTime() {
                 this._startingTime = Date.now();
@@ -121,14 +126,22 @@
             },
             _tick() {
                 index = this._calculateTime();
+                index = Math.trunc(index);
+
+                this._generateX_t();
+
+                ifOutValue = (this.treatment.toLowerCase() === "u") ? null : this._x_t;
+
                 if(this.isIn === true){
-                    this._generateX_t();
                     this._updateGraph([index, this._x_t]);
                     this._updatePayoff(this._x_t);
+
+                    this._X_tGraph([index, this._x_t]);
                     
                 } else {
                     this._updateGraph([index, this.c]);
                     this._updatePayoff(this.c);
+                    this._X_tGraph([index, ifOutValue]);
 
                 }
 
@@ -142,13 +155,14 @@
 
             },
             _updateGraph(data) {
-                this.payoff_graph.addData(data);
+                this.payoff_graph.addPersonalData(data);
             },
             _updatePayoff(current){
-                console.log("typeof current = " + typeof current);
-
                 this._currentPayoff = current;
                 this._cumulativePayoff = this._cumulativePayoff + current;
+            },
+            _X_tGraph(data){
+                    this.payoff_graph.addX_tData(data);
             }
 
         });
