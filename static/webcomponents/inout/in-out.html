@@ -7,10 +7,27 @@
 
 <dom-module id="in-out">
     <template>
-        <div id="strategy_info">
+        <style>
+            #choice {
+                font-weight: bold;
+            }
+            #text {
+                text-align: center;
+            }
+            #center-div {
+                margin: 0 auto;
+                
+            }
+            #buttons {
+                text-align: center;
+            }
+           
+        </style>
+
+        <div id="text">
             <span id="choice">{{ _inGroup }}/1</span> <span id="static_text"> in your group chose</span> <span id="choice"> P</span>
         </div>
-        <div id="payoff">
+        <div id="text">
             Your current pay off is {{ _currentPayoff }}; cumlative is {{ _cumulativePayoff }}
         </div>
         <div id="graphs">
@@ -18,23 +35,29 @@
                 game-Constant='[[ c ]]'>
             </payout-graph>
         </div>
-
+        <div id="text">
+            Your current choice is <span id="choice">{{ _choice }}</span>
+        </div>
+        <div id="text">
+           You have <span id="choice">{{ _timeLeft }}s</span> to switch or stay
+        </div>
         <br>
-
-        <button
-            type="button"
-            value=true
-            on-tap="_changeStatus"
-            class="choiceButton">
-            IN
-        </button>
-        <button
-            type="button"
-            value=false
-            on-tap="_changeStatus"
-            class="choiceButton">
-            OUT
-        </button>
+        <div id="buttons">
+            <button
+                type="button"
+                value=true
+                on-tap="_changeStatus"
+                class="choiceButton">
+                IN
+            </button>
+            <button
+                type="button"
+                value=false
+                on-tap="_changeStatus"
+                class="choiceButton">
+                OUT
+            </button>
+        </div>
     </template>   
     
     <script>
@@ -49,6 +72,14 @@
                 },
                 treatment: {
                     type: String,
+                },
+                _choice: {
+                    type: String,
+                    value: 'Q',
+                },
+                _timeLeft: {
+                    type: Number,
+                    value: 61,
                 },
                 _x_t: {
                     type: Number,
@@ -90,14 +121,17 @@
             _setStartingTime() {
                 this._startingTime = Date.now();
                 this._tick();
+                this._timeTick();
             },
             _changeStatus(e){
                 if(e.target.value === 'true'){
                     this.isIn = true;
                     this._inGroup = 1;
+                    this._choice = "P"
                 } else{
                     this.isIn = false;
                     this._inGroup = 0;
+                    this._choice = "Q"
                 }
             },
             _generateA() {
@@ -123,6 +157,17 @@
 
 
                 return timeNow;
+            },
+            _timeTick() {
+                if(this._timeLeft > 0){
+                    this._timeLeft = this._timeLeft - 1;
+
+                    this.timer = window.setTimeout(this._timeTick.bind(this), 1000);
+                } else {
+                    window.clearTimeout(this.timer);
+                }
+
+
             },
             _tick() {
                 index = this._calculateTime();
