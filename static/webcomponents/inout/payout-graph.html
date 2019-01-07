@@ -5,7 +5,14 @@
 <dom-module id="payout-graph">
 
     <template>
-        <div id="graph"></div>
+        <style> 
+            #graph {
+                padding-left: 25%;
+                
+            }
+        </style>
+    
+            <div id="graph"></div>
     </template>
 
     <script>
@@ -16,6 +23,9 @@
                     type: String,
                 },
                 gameConstant:{
+                    type: Number,
+                },
+                initialValue:{
                     type: Number,
                 },
                 _personalData: {
@@ -60,11 +70,7 @@
                         height: 500
                     },
                     title: { 
-                        text: "Your data",
-                        style: {
-                            align: "left",
-                            fontSize: 20,
-                        }
+                        text: "",
 
                     },
                     xAxis: {
@@ -76,9 +82,9 @@
                     },
                     yAxis: {
                         min: 0,
-                        max: 300, // Period length
+                        max: 300, 
                         title: {
-                            text: 'Period'
+                            text: 'Value'
                         },
 
                         plotLines: [{
@@ -109,9 +115,10 @@
                 
             },
             addPersonalData(dataArr) {
+
+
                 this._personalData.push(dataArr);
                 this.graph_obj.series[0].setData(this._personalData);
-                //console.log(this.graph_obj.series[0].data);
                 
             },
             addX_tData(dataArr) {

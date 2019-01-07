@@ -8,7 +8,11 @@ class MyPage(Page):
     def vars_for_template(self):
         return {
             "gameConstant": 120,        # Game constant to be determined by config file
-            "treatment": 'O',           # Treatment to be decided by config file
+            "treatment": 'U',           # Treatment to be decided by config file
+            "tickLength": 2000,         # Length of tick (Miliseconds) read in by config   
+            "a_sto": .5,                # Stochastic value A read in by config   
+            "s_sto": 60,                # Stochastic value S read in by config   
+            "x_0": 0
         }
     
 

@@ -5,6 +5,10 @@
     rel="import"
     href="/static/webcomponents/inout/payout-graph.html" />
 
+<link
+    rel="import"
+    href="/static/otree-redwood/webcomponents/redwood-period/redwood-period.html">
+
 <dom-module id="in-out">
     <template>
         <style>
@@ -14,15 +18,15 @@
             #text {
                 text-align: center;
             }
-            #center-div {
-                margin: 0 auto;
-                
-            }
             #buttons {
                 text-align: center;
             }
            
         </style>
+
+        <redwood-period>
+        </redwood-period>
+
 
         <div id="text">
             <span id="choice">{{ _inGroup }}/1</span> <span id="static_text"> in your group chose</span> <span id="choice"> P</span>
@@ -30,11 +34,10 @@
         <div id="text">
             Your current pay off is {{ _currentPayoff }}; cumlative is {{ _cumulativePayoff }}
         </div>
-        <div id="graphs">
-            <payout-graph
-                game-Constant='[[ c ]]'>
-            </payout-graph>
-        </div>
+        <br>
+        <payout-graph id="text"
+            game-Constant='[[ c ]]'>
+        </payout-graph>
         <div id="text">
             Your current choice is <span id="choice">{{ _choice }}</span>
         </div>
@@ -66,6 +69,16 @@
             properties: {
                 isIn: {
                     type: Boolean,
+                    value: true,
+                },
+                initialValue: {
+                    type: Number,
+                },
+                a: {
+                    type: Number,
+                },
+                s: {
+                    type: Number,
                 },
                 c: {
                     type: Number,
@@ -73,25 +86,38 @@
                 treatment: {
                     type: String,
                 },
+                tickLength: {
+                    type: Number,
+                },
+                _timeLeft: {
+                    type: Number,
+                    value: 60,
+                },
+                _timeDriftAdjustmentTick:{
+                    type: Number,
+                    value: 0
+                },
+                _timeDriftAdjustmentTimer:{
+                    type: Number,
+                    value: 0
+                },
+                _startingTime: {
+                    type: Number,
+                },
+                _previousTimeTick: {
+                    type: Number,
+                },
+                _previousTimeTimer: {
+                    type: Number,
+                },
                 _choice: {
                     type: String,
                     value: 'Q',
                 },
-                _timeLeft: {
-                    type: Number,
-                    value: 61,
-                },
                 _x_t: {
-                    type: Number,
-
-                },
-                _a_sto: {
                     type: Number,
                 },
                 _noise: {
-                    type: Number,
-                },
-                _startingTime: {
                     type: Number,
                 },
                 _inGroup:{
@@ -115,13 +141,17 @@
                 console.log("in-out.html");
                 this.async(this._setStartingTime, 1);
                 this.payoff_graph = this.$$('payout-graph');
-                
-                this._x_t = this.c;
+
+                this._x_t = this.initialValue;
             },
             _setStartingTime() {
                 this._startingTime = Date.now();
+
+                this._previousTimeTick = (this._startingTime / 1000);
+                this._previousTimeTimer = (this._startingTime / 1000);
+
                 this._tick();
-                this._timeTick();
+                this.timer = window.setTimeout(this._timeTick.bind(this), 1000);
             },
             _changeStatus(e){
                 if(e.target.value === 'true'){
@@ -134,18 +164,17 @@
                     this._choice = "Q"
                 }
             },
-            _generateA() {
-                this._a_sto = Math.random();
-            },
             _generateNoise() {
-                this._noise = Math.random()*(this.c);
+                noise1 = Math.random();
+                noise2 = Math.random();
+
+                this._noise = (noise1 + noise2)*(this.s);
             },
             _generateX_t() {
-                
-                this._generateA();
+
                 this._generateNoise();
 
-                this._x_t = ((this._a_sto * this._x_t) + this._noise);
+                this._x_t = ((this.a * this._x_t) + this._noise);
 
                 this._x_t = parseFloat(this._x_t.toFixed(3));
 
@@ -158,11 +187,28 @@
 
                 return timeNow;
             },
+            _calculateDrift(forTimer, currentTime){
+                if(forTimer === true){
+                    drift = (currentTime - this._previousTimeTimer);
+                    this._timeDriftAdjustmentTimer = drift;
+
+                    
+                } else {
+                    drift = (currentTime - this._previousTimeTick);
+                    this._timeDriftAdjustmentTick = drift;
+                    
+                }
+            },
             _timeTick() {
+                currTime = (Date.now() / 1000);
+                this._calculateDrift(true, currTime);
+                this._previousTimeTimer = currTime;
+
+                
                 if(this._timeLeft > 0){
                     this._timeLeft = this._timeLeft - 1;
 
-                    this.timer = window.setTimeout(this._timeTick.bind(this), 1000);
+                    this.timer = window.setTimeout(this._timeTick.bind(this), (1000 - this._timeDriftAdjustmentTimer) );
                 } else {
                     window.clearTimeout(this.timer);
                 }
@@ -190,11 +236,15 @@
 
                 }
 
+
+                currTime = (Date.now() / 1000);
+                this._calculateDrift(false, currTime);
+                this._previousTimeTick = currTime;
                 if(timeNow > 60){
                     window.clearTimeout(this.timeout);
                     console.log("Killed");
                 } else {
-                    this.timeout = window.setTimeout(this._tick.bind(this), 2000);
+                    this.timeout = window.setTimeout(this._tick.bind(this), (this.tickLength - this._timeDriftAdjustmentTick) );
                 }
 
 
