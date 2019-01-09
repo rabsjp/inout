@@ -26,6 +26,13 @@
 
         <redwood-period>
         </redwood-period>
+        <redwood-decision
+            my-decision="{{ isIn }}">
+        </redwood-decision>
+        <redwood-channel
+            channel="tick"
+            on-event="_tick">
+        </redwood-channel>
 
 
         <div id="text">
@@ -150,7 +157,6 @@
                 this._previousTimeTick = (this._startingTime / 1000);
                 this._previousTimeTimer = (this._startingTime / 1000);
 
-                this._tick();
                 this.timer = window.setTimeout(this._timeTick.bind(this), 1000);
             },
             _changeStatus(e){
@@ -215,39 +221,27 @@
 
 
             },
-            _tick() {
-                index = this._calculateTime();
-                index = Math.trunc(index);
+            _tick(e) {
+                let tick_msg = e.detail.payload[oTree.participantCode];
 
-                this._generateX_t();
+                console.log("IN TICK\n" + "MSG:");
+                console.log(tick_msg);
 
-                ifOutValue = (this.treatment.toLowerCase() === "u") ? null : this._x_t;
+                // Message from channel
 
+                // Value for x_t graph dependant on treatment
+                ifOutValue = (this.treatment.toLowerCase() === "u") ? null : tick_msg.x_t;
+                
+                // Updating values on graph
+                this._updateGraph([tick_msg.interval, tick_msg.value]);
+                this._updatePayoff(tick_msg.value);
+
+                // Updating x_t graph
                 if(this.isIn === true){
-                    this._updateGraph([index, this._x_t]);
-                    this._updatePayoff(this._x_t);
-
-                    this._X_tGraph([index, this._x_t]);
-                    
+                    this._X_tGraph([tick_msg.interval, tick_msg.x_t]);
                 } else {
-                    this._updateGraph([index, this.c]);
-                    this._updatePayoff(this.c);
                     this._X_tGraph([index, ifOutValue]);
-
                 }
-
-
-                currTime = (Date.now() / 1000);
-                this._calculateDrift(false, currTime);
-                this._previousTimeTick = currTime;
-                if(timeNow > 60){
-                    window.clearTimeout(this.timeout);
-                    console.log("Killed");
-                } else {
-                    this.timeout = window.setTimeout(this._tick.bind(this), (this.tickLength - this._timeDriftAdjustmentTick) );
-                }
-
-
             },
             _updateGraph(data) {
                 this.payoff_graph.addPersonalData(data);
