@@ -4,10 +4,15 @@
 <link
     rel="import"
     href="/static/webcomponents/inout/payout-graph.html" />
-
 <link
     rel="import"
     href="/static/otree-redwood/webcomponents/redwood-period/redwood-period.html">
+<link
+    rel="import"
+    href="/static/otree-redwood/webcomponents/redwood-channel/redwood-channel.html">
+<link
+    rel="import"
+    href="/static/otree-redwood/webcomponents/redwood-decision/redwood-decision.html">
 
 <dom-module id="in-out">
     <template>
@@ -55,14 +60,14 @@
         <div id="buttons">
             <button
                 type="button"
-                value=true
+                value=1
                 on-tap="_changeStatus"
                 class="choiceButton">
                 IN
             </button>
             <button
                 type="button"
-                value=false
+                value=0
                 on-tap="_changeStatus"
                 class="choiceButton">
                 OUT
@@ -75,16 +80,6 @@
             is: 'in-out',
             properties: {
                 isIn: {
-                    type: Boolean,
-                    value: true,
-                },
-                initialValue: {
-                    type: Number,
-                },
-                a: {
-                    type: Number,
-                },
-                s: {
                     type: Number,
                 },
                 c: {
@@ -100,18 +95,11 @@
                     type: Number,
                     value: 60,
                 },
-                _timeDriftAdjustmentTick:{
-                    type: Number,
-                    value: 0
-                },
                 _timeDriftAdjustmentTimer:{
                     type: Number,
                     value: 0
                 },
                 _startingTime: {
-                    type: Number,
-                },
-                _previousTimeTick: {
                     type: Number,
                 },
                 _previousTimeTimer: {
@@ -120,12 +108,6 @@
                 _choice: {
                     type: String,
                     value: 'Q',
-                },
-                _x_t: {
-                    type: Number,
-                },
-                _noise: {
-                    type: Number,
                 },
                 _inGroup:{
                     type: Number,
@@ -149,23 +131,23 @@
                 this.async(this._setStartingTime, 1);
                 this.payoff_graph = this.$$('payout-graph');
 
-                this._x_t = this.initialValue;
+                this.isIn = 0;
             },
             _setStartingTime() {
                 this._startingTime = Date.now();
 
-                this._previousTimeTick = (this._startingTime / 1000);
                 this._previousTimeTimer = (this._startingTime / 1000);
 
                 this.timer = window.setTimeout(this._timeTick.bind(this), 1000);
             },
             _changeStatus(e){
-                if(e.target.value === 'true'){
-                    this.isIn = true;
+                if(e.target.value === '1'){
+                    console.log(true);
+                    this.isIn = 1;
                     this._inGroup = 1;
                     this._choice = "P"
                 } else{
-                    this.isIn = false;
+                    this.isIn = 0;
                     this._inGroup = 0;
                     this._choice = "Q"
                 }
@@ -176,15 +158,6 @@
 
                 this._noise = (noise1 + noise2)*(this.s);
             },
-            _generateX_t() {
-
-                this._generateNoise();
-
-                this._x_t = ((this.a * this._x_t) + this._noise);
-
-                this._x_t = parseFloat(this._x_t.toFixed(3));
-
-            },
             _calculateTime() {
                 tempNow = (Date.now() / 1000);
                 tempBegin = (this._startingTime / 1000);
@@ -194,16 +167,11 @@
                 return timeNow;
             },
             _calculateDrift(forTimer, currentTime){
-                if(forTimer === true){
-                    drift = (currentTime - this._previousTimeTimer);
-                    this._timeDriftAdjustmentTimer = drift;
+                
+                drift = (currentTime - this._previousTimeTimer);
+                this._timeDriftAdjustmentTimer = drift;
 
-                    
-                } else {
-                    drift = (currentTime - this._previousTimeTick);
-                    this._timeDriftAdjustmentTick = drift;
-                    
-                }
+                 
             },
             _timeTick() {
                 currTime = (Date.now() / 1000);
@@ -237,10 +205,10 @@
                 this._updatePayoff(tick_msg.value);
 
                 // Updating x_t graph
-                if(this.isIn === true){
+                if(this.isIn === 1){
                     this._X_tGraph([tick_msg.interval, tick_msg.x_t]);
                 } else {
-                    this._X_tGraph([index, ifOutValue]);
+                    this._X_tGraph([tick_msg.interval, ifOutValue]);
                 }
             },
             _updateGraph(data) {

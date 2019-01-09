@@ -7,6 +7,7 @@ from otree_redwood.models import DecisionGroup
 from otree_redwood.utils import DiscreteEventEmitter
 
 import numpy as np
+import csv
 
 author = 'Your name here'
 
@@ -16,18 +17,19 @@ Your app description
 
 def parse_config(config):
     # parsingmethod for the config files
+    with open( 'inout/configs/' +  config) as config_file:
+        data = list(csv.DictReader(config_file))
 
-    # Hard Coded now but will change to be from config
+
     configs = {
-        'period_length': 60,
-        'tick_length': 2,
-        'num_rounds': 1,
-        'constant': 120,
-        'a_sto': .5,
-        's_sto': .5
-
+        'period_length': float(data[0]['period_length']),
+        'tick_length': float(data[0]['tick_length']),
+        'game_constant': float(data[0]['game_constant']),
+        'a_sto': float(data[0]['a_sto']),
+        's_sto': float(data[0]['s_sto']),
+        'x_0': float(data[0]['x_0']),
+        'treatment': data[0]['treatment']
     }
-
     return configs
 
 
@@ -49,23 +51,31 @@ class Group(DecisionGroup):
         return {'msg': "test"}
 
     def period_length(self):
-        return parse_config("placeholder")["period_length"]
+        return parse_config(self.session.config['config_file'])["period_length"]
     
     def tick_length(self):
-        return parse_config("placeholder")["tick_length"]
+        return parse_config(self.session.config['config_file'])["tick_length"]
+
+    def game_constant(self):
+        return parse_config(self.session.config['config_file'])["game_constant"]
 
     def a_sto(self):
-        return parse_config("placeholder")["a_sto"]        
+        return parse_config(self.session.config['config_file'])["a_sto"]        
     
     def s_sto(self):
-        return parse_config("placeholder")["s_sto"]        
+        return parse_config(self.session.config['config_file'])["s_sto"]        
 
-    def constant_payout(self):
-        return parse_config("placeholder")["constant"]
+    def x_0(self):
+        return parse_config(self.session.config['config_file'])["x_0"]
+    
+    def treatment(self):
+        return parse_config(self.session.config['config_file'])["treatment"]        
+
 
     def when_all_players_ready(self):
         super().when_all_players_ready()
-        print("started")
+
+        self.x_t = self.x_0()
 
         emitter = DiscreteEventEmitter(
             self.tick_length(),
@@ -79,14 +89,18 @@ class Group(DecisionGroup):
     def tick(self, current_interval, interval):
         self.refresh_from_db()
 
+        # For a randomly generated initial uncommment the generate below and the comment the other generate
+        # self.generate_x_t()
 
         # Message to channel, Include x_t value for treatment
         msg = {}
 
         for player in self.get_players():
             playerCode = player.participant.code
+            print("player code: " + playerCode)
             if self.group_decisions[playerCode] is 1:
                 # player is in, send stochastic value
+                print("Decision is true")
                 player.update_payoff(self.x_t)
                 msg[playerCode] = {
                     'interval': current_interval * self.tick_length(),
@@ -96,10 +110,11 @@ class Group(DecisionGroup):
                 }
             elif self.group_decisions[playerCode] is 0:
                 # player is out, send constant C
-                player.update_payoff(100)       # Change to constant value
+                print("Decision is false")
+                player.update_payoff(self.game_constant())       # Change to constant value
                 msg[playerCode] = {
                     'interval': current_interval * self.tick_length(),
-                    'value': 100,
+                    'value': self.game_constant(),
                     'payoff': player.get_payoff(),
                     'x_t': self.x_t
                 }
@@ -110,20 +125,19 @@ class Group(DecisionGroup):
         # Send message across channel
         self.send('tick', msg)
 
-        # For a hard coded initial value keep down here
+        # For a config initial value keep down here
         # For a randomly generated initial value move to before message generation
         self.generate_x_t()
 
     def generate_x_t(self):
         self.x_t = ( (self.a_sto() * self.x_t) + self.generate_noise())
 
-        # print(self.x_t)            
+        self.save()     
         return self.x_t
 
     def generate_noise(self):
-        e_t = np.random.normal(0,1)
+        e_t = np.abs(np.random.normal(0,1))
 
-        print( (self.s_sto() * e_t) )
         return (self.s_sto() * e_t)
 
 
@@ -133,17 +147,6 @@ class Group(DecisionGroup):
 class Player(BasePlayer):
     cumulative_pay = models.IntegerField(initial=0)
     payoff = models.CurrencyField(initial=0)
-    status = models.BooleanField()
-
-    def initial_decision(self):
-        return 0
-
-    def get_status(self):
-        return self.status
-
-    def set_status(self):
-        self.status = not self.status
-
     def update_payoff(self, pay):
         self.payoff = self.payoff + pay
         self.cumulative_pay = self.cumulative_pay + pay
