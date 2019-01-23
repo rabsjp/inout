@@ -81,6 +81,7 @@
             properties: {
                 isIn: {
                     type: Number,
+                    value: 1,
                 },
                 c: {
                     type: Number,
@@ -130,8 +131,6 @@
                 console.log("in-out.html");
                 this.async(this._setStartingTime, 1);
                 this.payoff_graph = this.$$('payout-graph');
-
-                this.isIn = 0;
             },
             _setStartingTime() {
                 this._startingTime = Date.now();

@@ -75,7 +75,7 @@ class Group(DecisionGroup):
     def when_all_players_ready(self):
         super().when_all_players_ready()
 
-        self.x_t = self.x_0()
+        self.x_t = None
 
         emitter = DiscreteEventEmitter(
             self.tick_length(),
@@ -90,7 +90,7 @@ class Group(DecisionGroup):
         self.refresh_from_db()
 
         # For a randomly generated initial uncommment the generate below and the comment the other generate
-        # self.generate_x_t()
+        self.generate_x_t()
 
         # Message to channel, Include x_t value for treatment
         msg = {}
@@ -125,18 +125,21 @@ class Group(DecisionGroup):
         # Send message across channel
         self.send('tick', msg)
 
-        # For a config initial value keep down here
-        # For a randomly generated initial value move to before message generation
-        self.generate_x_t()
+        
 
     def generate_x_t(self):
+        if self.x_t is None:
+            self.x_t = self.x_0()
+            self.save()
+            return self.x_t
+        
         self.x_t = ( (self.a_sto() * self.x_t) + self.generate_noise())
 
         self.save()     
         return self.x_t
 
     def generate_noise(self):
-        e_t = np.abs(np.random.normal(0,1))
+        e_t = np.random.normal(0,1)
 
         return (self.s_sto() * e_t)
 
@@ -150,6 +153,10 @@ class Player(BasePlayer):
     def update_payoff(self, pay):
         self.payoff = self.payoff + pay
         self.cumulative_pay = self.cumulative_pay + pay
+        self.save()
 
     def get_payoff(self):
         return self.cumulative_pay
+
+    def initial_decision(self):
+        return 1
