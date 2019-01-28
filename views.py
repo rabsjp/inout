@@ -4,7 +4,7 @@ from ._builtin import Page, WaitPage
 from .models import Constants, parse_config
 
 
-class MyPage(Page):
+class Decision(Page):
     def vars_for_template(self):
         return {
             "gameConstant": parse_config(self.session.config['config_file'])["game_constant"],        # Game constant to be determined by config file
@@ -24,7 +24,7 @@ class Results(Page):
 
 
 page_sequence = [
-    MyPage,
+    Decision,
     ResultsWaitPage,
     Results
 ]

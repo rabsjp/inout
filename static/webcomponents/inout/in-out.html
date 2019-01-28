@@ -26,6 +26,16 @@
             #buttons {
                 text-align: center;
             }
+            .unhiglighted {
+                border: 1px solid #000000;
+                background: #ffffff;
+
+            }
+            .unhiglighted {
+                border: 1px solid #000000;
+                background: #ffffff;
+
+            }
            
         </style>
 
@@ -50,27 +60,15 @@
         <payout-graph id="text"
             game-Constant='[[ c ]]'>
         </payout-graph>
-        <div id="text">
-            Your current choice is <span id="choice">{{ _choice }}</span>
-        </div>
-        <div id="text">
-           You have <span id="choice">{{ _timeLeft }}s</span> to switch or stay
-        </div>
         <br>
         <div id="buttons">
             <button
+                id="in_button"
                 type="button"
                 value=1
                 on-tap="_changeStatus"
-                class="choiceButton">
-                IN
-            </button>
-            <button
-                type="button"
-                value=0
-                on-tap="_changeStatus"
-                class="choiceButton">
-                OUT
+                class="unhiglighted">
+                Switch
             </button>
         </div>
     </template>   
@@ -89,30 +87,17 @@
                 treatment: {
                     type: String,
                 },
-                tickLength: {
-                    type: Number,
+                inBool: {
+                    type: Boolean,
+                    value: true
                 },
                 _timeLeft: {
                     type: Number,
                     value: 60,
                 },
-                _timeDriftAdjustmentTimer:{
-                    type: Number,
-                    value: 0
-                },
-                _startingTime: {
-                    type: Number,
-                },
-                _previousTimeTimer: {
-                    type: Number,
-                },
-                _choice: {
-                    type: String,
-                    value: 'Q',
-                },
                 _inGroup:{
                     type: Number,
-                    value: 0,
+                    value: 1,
                 },
                 _currentPayoff: {
                     type: Number,
@@ -129,26 +114,21 @@
             },
             ready() {
                 console.log("in-out.html");
-                this.async(this._setStartingTime, 1);
                 this.payoff_graph = this.$$('payout-graph');
-            },
-            _setStartingTime() {
-                this._startingTime = Date.now();
-
-                this._previousTimeTimer = (this._startingTime / 1000);
-
-                this.timer = window.setTimeout(this._timeTick.bind(this), 1000);
+                this.in_button = this.$$('button');
+                this.out_button = this.$$('button');
+                console.log(this.in_button);
+                console.log(this.out_button);
             },
             _changeStatus(e){
-                if(e.target.value === '1'){
+                this.inBool = !this.inBool;
+                if(this.inBool === true){
                     console.log(true);
                     this.isIn = 1;
                     this._inGroup = 1;
-                    this._choice = "P"
                 } else{
                     this.isIn = 0;
                     this._inGroup = 0;
-                    this._choice = "Q"
                 }
             },
             _generateNoise() {
@@ -157,42 +137,11 @@
 
                 this._noise = (noise1 + noise2)*(this.s);
             },
-            _calculateTime() {
-                tempNow = (Date.now() / 1000);
-                tempBegin = (this._startingTime / 1000);
-                timeNow = tempNow - tempBegin;
-
-
-                return timeNow;
-            },
-            _calculateDrift(forTimer, currentTime){
-                
-                drift = (currentTime - this._previousTimeTimer);
-                this._timeDriftAdjustmentTimer = drift;
-
-                 
-            },
-            _timeTick() {
-                currTime = (Date.now() / 1000);
-                this._calculateDrift(true, currTime);
-                this._previousTimeTimer = currTime;
-
-                
-                if(this._timeLeft > 0){
-                    this._timeLeft = this._timeLeft - 1;
-
-                    this.timer = window.setTimeout(this._timeTick.bind(this), (1000 - this._timeDriftAdjustmentTimer) );
-                } else {
-                    window.clearTimeout(this.timer);
-                }
-
-
-            },
             _tick(e) {
                 let tick_msg = e.detail.payload[oTree.participantCode];
 
-                console.log("IN TICK\n" + "MSG:");
-                console.log(tick_msg);
+                //console.log("IN TICK\n" + "MSG:");
+                //console.log(tick_msg);
 
                 // Message from channel
 
@@ -215,7 +164,8 @@
             },
             _updatePayoff(current){
                 this._currentPayoff = current;
-                this._cumulativePayoff = this._cumulativePayoff + current;
+                trunc = this._cumulativePayoff + current;
+                this._cumulativePayoff = Math.trunc(trunc);
             },
             _X_tGraph(data){
                     this.payoff_graph.addX_tData(data);

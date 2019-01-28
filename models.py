@@ -8,6 +8,7 @@ from otree_redwood.utils import DiscreteEventEmitter
 
 import numpy as np
 import csv
+import math
 
 author = 'Your name here'
 
@@ -102,6 +103,7 @@ class Group(DecisionGroup):
                 # player is in, send stochastic value
                 print("Decision is true")
                 player.update_payoff(self.x_t)
+                print(player.get_payoff())
                 msg[playerCode] = {
                     'interval': current_interval * self.tick_length(),
                     'value': self.x_t,
@@ -134,6 +136,7 @@ class Group(DecisionGroup):
             return self.x_t
         
         self.x_t = ( (self.a_sto() * self.x_t) + self.generate_noise())
+        self.x_t = round(self.x_t, 2)
 
         self.save()     
         return self.x_t
@@ -152,7 +155,10 @@ class Player(BasePlayer):
     payoff = models.CurrencyField(initial=0)
     def update_payoff(self, pay):
         self.payoff = self.payoff + pay
+        self.payoff = round(self.payoff, 2)
         self.cumulative_pay = self.cumulative_pay + pay
+        self.cumulative_pay = math.floor(self.cumulative_pay)
+
         self.save()
 
     def get_payoff(self):
