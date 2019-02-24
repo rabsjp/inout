@@ -34,10 +34,11 @@
 {% endblock %}
 
 {% block content %}
-
+    {% comment %} INOUT polymer {% endcomment %}
     <in-out
         c='{{ gameConstant }}'
-        treatment='{{ treatment }}'>
+        treatment='{{ treatment }}'
+        >
     </in-out>
 
 {% endblock %}

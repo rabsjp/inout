@@ -8,7 +8,6 @@
         <style> 
             #graph {
                 padding-left: 25%;
-                
             }
         </style>
     
@@ -44,6 +43,7 @@
             },
             ready() {
                 console.log("Graph loaded");
+                // Async inits chart at end of event queue.
                 this.async(this._initChart.bind(this), 1);
                 
             },
@@ -51,7 +51,8 @@
                 console.log("initializing graph");
                 let series = [
                     {
-                        type: 'line',
+                        type: 'area',
+                        color: '#00FF00',
                         name: "Value (me)",
                         data: this._personalData,
                     },
@@ -115,13 +116,13 @@
                 
             },
             addPersonalData(dataArr) {
-
-
+                // Push user values into series
                 this._personalData.push(dataArr);
                 this.graph_obj.series[0].setData(this._personalData);
                 
             },
             addX_tData(dataArr) {
+                // Push stochastic value to its series
                 this._X_tData.push(dataArr);
                 this.graph_obj.series[1].setData(this._X_tData);
             },
