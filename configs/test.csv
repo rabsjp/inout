@@ -1,2 +1,2 @@
 game_constant,treatment,tick_length,period_length,a_sto,s_sto,x_0,b_sto
-180,U,1,60,.1,30,0,160
+180,U,.333,60,.1,30,0,160
