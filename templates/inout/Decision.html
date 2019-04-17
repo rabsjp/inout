@@ -1,4 +1,4 @@
-{% extends "global/Page.html" %}
+{% extends "otree_redwood/Page.html" %}
 {% load staticfiles otree %}
 
 
@@ -6,31 +6,10 @@
 {% block scripts %}
     <script src="//code.highcharts.com/stock/highstock.js"></script>
 
-    <script>
-        var oTree = oTree || {};
-       (function() {
-         oTree.group = parseInt("{{ player.group.pk }}");
-         oTree.group = isNaN(oTree.group) ? null : oTree.group;
-         oTree.role = "{{ player.role }}";
-         oTree.participantCode = "{{ player.participant.code }}";
-         oTree.appName = "{{ subsession.app_name }}";
-         oTree.idInGroup = "{{ player.id_in_group }}";
-         oTree.csrfToken = "{{ csrf_token }}";
-         {% if view.is_debug %}
-         oTree.debug = true;
-         {% else %}
-         oTree.debug = false;
-         {% endif %}
-       })();
-     </script>
-
     <link
         rel="import"
         href="{% static "webcomponents/inout/in-out.html" %}">
 
-    <script>
-        {% comment %} console.log("{{ data }}"); {% endcomment %}
-    </script>
 {% endblock %}
 
 {% block content %}

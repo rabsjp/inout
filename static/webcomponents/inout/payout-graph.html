@@ -27,14 +27,6 @@
                 initialValue:{
                     type: Number,
                 },
-                _personalData: {
-                    type: Array,
-                    value: [],
-                },
-                _X_tData: {
-                    type: Array,
-                    value: [],
-                },
                 _index: {
                     type: Number,
                     value: 0
@@ -54,12 +46,12 @@
                         type: 'area',
                         color: '#00FF00',
                         name: "Value (me)",
-                        data: this._personalData,
+                        data: [],
                     },
                     {
                         type: 'line',
                         name: "Stochastic Payout",
-                        data: this._X_tData,
+                        data: [],
                     }
                 ];
 
@@ -116,15 +108,11 @@
                 
             },
             addPersonalData(dataArr) {
-                // Push user values into series
-                this._personalData.push(dataArr);
-                this.graph_obj.series[0].setData(this._personalData);
-                
+                this.graph_obj.series[0].addPoint(dataArr);
             },
             addX_tData(dataArr) {
                 // Push stochastic value to its series
-                this._X_tData.push(dataArr);
-                this.graph_obj.series[1].setData(this._X_tData);
+                this.graph_obj.series[1].addPoint(dataArr);
             },
         });
     </script>

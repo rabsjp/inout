@@ -19,27 +19,29 @@ Your app description
 def parse_config(config):
     # parsingmethod for the config files
     with open( 'inout/configs/' +  config) as config_file:
-        data = list(csv.DictReader(config_file))
+        rows = list(csv.DictReader(config_file))
 
     # Single round implementation, for more rounds add more rows and
     # traverse them
-    configs = {
-        'period_length': float(data[0]['period_length']),
-        'tick_length': float(data[0]['tick_length']),
-        'game_constant': float(data[0]['game_constant']),
-        'a_sto': float(data[0]['a_sto']),
-        'b_sto': float(data[0]['b_sto']),
-        's_sto': float(data[0]['s_sto']),
-        'x_0': float(data[0]['x_0']),
-        'treatment': data[0]['treatment']
-    }
+    configs = []
+    for row in rows:
+        configs.append({
+            'period_length': float(row['period_length']),
+            'tick_length': float(row['tick_length']),
+            'game_constant': float(row['game_constant']),
+            'a_sto': float(row['a_sto']),
+            'b_sto': float(row['b_sto']),
+            's_sto': float(row['s_sto']),
+            'x_0': float(row['x_0']),
+            'treatment': row['treatment']
+        })
     return configs
 
 
 class Constants(BaseConstants):
     name_in_url = 'inout'
     players_per_group = None
-    num_rounds = 1
+    num_rounds = 100
 
 
 class Subsession(BaseSubsession):
@@ -50,34 +52,33 @@ class Group(DecisionGroup):
     interval = models.IntegerField(initial=0)
     x_t = models.IntegerField(initial=0) 
 
-    # oTree Redwood
-    def placeholder_callback(self):
-        return {'msg': "test"}
-
     # Getters for config values
     def period_length(self):
-        return parse_config(self.session.config['config_file'])["period_length"]
+        return parse_config(self.session.config['config_file'])[self.round_number-1]["period_length"]
     
     def tick_length(self):
-        return parse_config(self.session.config['config_file'])["tick_length"]
+        return parse_config(self.session.config['config_file'])[self.round_number-1]["tick_length"]
 
     def game_constant(self):
-        return parse_config(self.session.config['config_file'])["game_constant"]
+        return parse_config(self.session.config['config_file'])[self.round_number-1]["game_constant"]
 
     def a_sto(self):
-        return parse_config(self.session.config['config_file'])["a_sto"]        
+        return parse_config(self.session.config['config_file'])[self.round_number-1]["a_sto"]        
     
     def b_sto(self):
-        return parse_config(self.session.config['config_file'])["b_sto"]        
+        return parse_config(self.session.config['config_file'])[self.round_number-1]["b_sto"]        
     
     def s_sto(self):
-        return parse_config(self.session.config['config_file'])["s_sto"]        
+        return parse_config(self.session.config['config_file'])[self.round_number-1]["s_sto"]        
 
     def x_0(self):
-        return parse_config(self.session.config['config_file'])["b_sto"]
+        return parse_config(self.session.config['config_file'])[self.round_number-1]["b_sto"]
     
     def treatment(self):
-        return parse_config(self.session.config['config_file'])["treatment"]        
+        return parse_config(self.session.config['config_file'])[self.round_number-1]["treatment"]        
+
+    def num_rounds(self):
+        return len(parse_config(self.session.config['config_file']))
 
     # oTree Redwood method
     def when_all_players_ready(self):
