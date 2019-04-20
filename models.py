@@ -51,7 +51,6 @@ class Subsession(BaseSubsession):
 class Group(DecisionGroup):
     interval = models.IntegerField(initial=0)
     x_t = models.IntegerField(initial=0) 
-
     # Getters for config values
     def period_length(self):
         return parse_config(self.session.config['config_file'])[self.round_number-1]["period_length"]
@@ -72,7 +71,7 @@ class Group(DecisionGroup):
         return parse_config(self.session.config['config_file'])[self.round_number-1]["s_sto"]        
 
     def x_0(self):
-        return parse_config(self.session.config['config_file'])[self.round_number-1]["b_sto"]
+        return parse_config(self.session.config['config_file'])[self.round_number-1]["x_0"]
     
     def treatment(self):
         return parse_config(self.session.config['config_file'])[self.round_number-1]["treatment"]        
@@ -111,12 +110,12 @@ class Group(DecisionGroup):
             # print("player code: " + playerCode)
             if self.group_decisions[playerCode] is 1:
                 # player is in, send stochastic value
-                player.update_payoff(self.x_t)
+                player.update_payoff(self.x_t+self.b_sto())
                 msg[playerCode] = {
                     'interval': current_interval * self.tick_length(),
-                    'value': self.x_t,
+                    'value': self.x_t+self.b_sto(),
                     'payoff': player.get_payoff(),
-                    'x_t': self.x_t,
+                    'x_t': self.x_t+self.b_sto(), # change the x displayed
                     'decision': 1
                 }
             elif self.group_decisions[playerCode] is 0:
@@ -126,7 +125,7 @@ class Group(DecisionGroup):
                     'interval': current_interval * self.tick_length(),
                     'value': self.game_constant(),
                     'payoff': player.get_payoff(),
-                    'x_t': self.x_t,
+                    'x_t': self.x_t+self.b_sto(), # change the x displayed
                     'decision': 0
                 }
             else:
@@ -152,7 +151,7 @@ class Group(DecisionGroup):
         self.x_t = ( (self.a_sto() * self.x_t) + self.generate_noise())
         
         # b offset value
-        self.x_t += self.b_sto()
+        #self.x_t += self.b_sto()
 
         # round to .2f
         self.x_t = round(self.x_t, 2)
