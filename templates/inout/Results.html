@@ -2,11 +2,16 @@
 {% load staticfiles otree %}
 
 {% block title %}
-    Page title
+    Results
 {% endblock %}
 
 {% block content %}
+    <div> 
+    <p>Payoff last round: {{cumulative_pay }}</p>
+    <p>Total points: {{all_pay }}</p>
 
+    <p> Total points converted to cash: {{all_pay_cash}}</p>
+ </div>
     {% next_button %}
 {% endblock %}
 

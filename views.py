@@ -23,10 +23,17 @@ class ResultsWaitPage(WaitPage):
 
 
 class Results(Page):
-    
     def is_displayed(self):
         return self.round_number <= self.group.num_rounds()
-
+     
+    def vars_for_template(self):
+        
+        
+        return {
+            "cumulative_pay": self.player.get_payoff(),
+             "all_pay": self.player.set_cumpay(),
+            "all_pay_cash": self.player.set_cumpay()*self.session.config['real_world_currency_per_point']
+        }
 
 def get_output_table_header(groups):
     header = [

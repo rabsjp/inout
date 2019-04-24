@@ -182,11 +182,11 @@ class Player(BasePlayer):
 
     # Update both payoff values
     def update_payoff(self, pay):
-        self.payoff = self.payoff + pay
-        self.payoff = round(self.payoff, 2)
+        #self.payoff = self.payoff + pay
+        #self.payoff = round(self.payoff, 2)
         self.cumulative_pay = self.cumulative_pay + pay
         self.cumulative_pay = math.floor(self.cumulative_pay)
-        
+        self.payoff = self.cumulative_pay
         # Always save so database updates user values
         self.save()
 
@@ -195,7 +195,10 @@ class Player(BasePlayer):
     #       Curreny(). Causes error with redwood messaging
     def get_payoff(self):
         return self.cumulative_pay
-
+    
+    def set_cumpay(self):        
+        self.cum_payoff= sum([j.cumulative_pay for j in self.in_all_rounds()])
+        return self.cum_payoff
     # Player starts in
     def initial_decision(self):
         return 1
