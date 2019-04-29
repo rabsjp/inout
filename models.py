@@ -33,7 +33,9 @@ def parse_config(config):
             'b_sto': float(row['b_sto']),
             's_sto': float(row['s_sto']),
             'x_0': float(row['x_0']),
-            'treatment': row['treatment']
+            'treatment': row['treatment'],
+            'num_practice_rounds': float(row['num_practice_rounds']),
+            
         })
     return configs
 
@@ -78,7 +80,11 @@ class Group(DecisionGroup):
 
     def num_rounds(self):
         return len(parse_config(self.session.config['config_file']))
-
+    
+    def num_practice_rounds(self):
+        return parse_config(self.session.config['config_file'])[self.round_number-1]["num_practice_rounds"]  
+    
+    
     # oTree Redwood method
     def when_all_players_ready(self):
         super().when_all_players_ready()
@@ -184,9 +190,14 @@ class Player(BasePlayer):
     def update_payoff(self, pay):
         #self.payoff = self.payoff + pay
         #self.payoff = round(self.payoff, 2)
+        #if self.round_number>0 : 
         self.cumulative_pay = self.cumulative_pay + pay
         self.cumulative_pay = math.floor(self.cumulative_pay)
         self.payoff = self.cumulative_pay
+        #else: 
+        #    self.cumulative_pay = 0 
+        #    self.payoff = 0
+        
         # Always save so database updates user values
         self.save()
 
@@ -196,9 +207,52 @@ class Player(BasePlayer):
     def get_payoff(self):
         return self.cumulative_pay
     
-    def set_cumpay(self):        
-        self.cum_payoff= sum([j.cumulative_pay for j in self.in_all_rounds()])
+    def set_cumpay(self):    
+        
+        if self.round_number > self.group.num_practice_rounds(): 
+            self.cum_payoff = sum([j.cumulative_pay for j in self.in_rounds(self.group.num_practice_rounds()+1, self.round_number)])
+        else:
+            self.cum_payoff = 0 
+        
         return self.cum_payoff
     # Player starts in
     def initial_decision(self):
         return 1
+    
+    question_1 = models.IntegerField(
+        label="What is the average payoff of the Value of IN",
+        choices=[
+            [1, 'x + 50'],
+            [2, 'x - 50 '],
+            [3, '0 '],
+            [4, '100'],
+            [5, '150'],
+            [6, '200'],
+        ])
+     
+    question_2 = models.IntegerField(
+        label="If you select OUT, then you accumulate points according to ___________",
+        choices=[
+            [1, '0'],
+            [2, 'x+100'],
+            [3, 'x'],
+            [4, 'a constant (92) depicted as horizontal line '],
+            [5, 'a constant (100) depicted as horizontal line'],
+            [6, 'None of above'],
+        ])
+        
+    question_3 = models.IntegerField(
+        label="If you switch from OUT to IN, can you switch again and go OUT? ",
+        choices=[
+            [1, 'Yes'],
+            [2, 'No']
+        ])
+        
+    question_4 = models.IntegerField(
+        label="Does the current value of x affect the future value of x in the next period? ",
+        choices=[
+            [1, 'Yes'],
+            [2, 'No']
+        ])
+        
+        

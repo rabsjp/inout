@@ -1,0 +1,28 @@
+{% extends "global/Page.html" %}
+{% load staticfiles otree_tags %}
+
+{% block title %}
+    Introduction
+{% endblock %}
+
+{% block styles %}
+    <style>
+        iframe {
+            width: 100%;
+            height: 85vh;
+            padding-bottom: 15px;
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+
+	{% with template_name=subsession.app_name|add:"/Instructions.html" %}
+		{% include template_name %}
+	{% endwith %}
+
+    <iframe src="{{ instructions_link }}" frameborder="0"></iframe>
+
+    {% next_button %}
+
+{% endblock %}
